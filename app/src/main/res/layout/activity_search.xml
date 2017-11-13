@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_repeat"
+    android:orientation="vertical"
+    >
+    <TextView
+        android:textAlignment="center"
+        android:layout_marginTop="10dp"
+        android:textSize="30sp"
+        android:textColor="@color/white"
+        android:text="Stock Market Search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <AutoCompleteTextView
+        android:textAlignment="center"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         />
+    <LinearLayout
+        android:weightSum="2"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/search_button"
+            android:text="Get Quote"
+            android:textSize="20sp"
+            android:textColor="@color/blue"
+            android:textAlignment="center"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            />
+        <TextView
+            android:id="@+id/clear_button"
+            android:text="Clear"
+            android:textSize="20sp"
+            android:textColor="@color/blue"
+            android:textAlignment="center"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="Favorites"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:gravity="end"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="AutoRefresh"
+                android:textSize="15sp"
+                android:gravity="end"
+                android:textColor="@color/white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <Switch
+                android:id="@+id/auto_refresh_switch"
+                android:layout_marginStart="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageButton
+                android:id="@+id/refresh_button"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/refresh"
+                android:background="@android:color/transparent"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="20dp"
+        android:weightSum="8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="Sort by"
+            android:textSize="15sp"
+            android:layout_weight="3"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Spinner
+            android:id="@+id/sort_by_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </Spinner>
+        <TextView
+            android:text="Order"
+            android:textSize="15sp"
+            android:layout_gravity="center"
+            android:layout_weight="3"
+            android:textAlignment="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Spinner
+            android:id="@+id/order_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </Spinner>
+
+    </LinearLayout>
+    <ListView
+        android:id="@+id/favorite_list"
+        android:background="@color/white"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
+
+
+
+</LinearLayout>
