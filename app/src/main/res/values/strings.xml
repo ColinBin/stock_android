@@ -4,5 +4,28 @@
     <string name="tab_text_2">Tab 2</string>
     <string name="tab_text_3">Tab 3</string>
     <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+
+
+    <string name="sort_by_prompt">Sort by</string>
+    <string name="order_prompt">Order</string>
+    <string-array name="sort_by_array">
+        <item>Default</item>
+        <item>Symbol</item>
+        <item>Price</item>
+        <item>Change</item>
+        <item>Change (%)</item>
+    </string-array>
+    <string-array name="order_array">
+        <item>Ascending</item>
+        <item>Descending</item>
+    </string-array>
+    <string-array name="indicator_array">
+        <item>Price</item>
+        <item>SMA</item>
+        <item>EMA</item>
+        <item>MACD</item>
+        <item>RSI</item>
+        <item>ADX</item>
+        <item>CCI</item>
+    </string-array>
 </resources>

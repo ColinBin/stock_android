@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <AutoCompleteTextView
+        android:id="@+id/search_text"
         android:textAlignment="center"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -90,47 +91,48 @@
     </LinearLayout>
     <LinearLayout
         android:layout_marginTop="20dp"
-        android:layout_marginStart="40dp"
+        android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:weightSum="8"
+        android:weightSum="9"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TextView
-            android:text="Sort by"
-            android:textSize="15sp"
-            android:layout_weight="3"
-            android:layout_gravity="center"
-            android:textAlignment="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+
         <Spinner
             android:id="@+id/sort_by_spinner"
-            android:layout_width="wrap_content"
+            android:textAlignment="center"
+            android:layout_weight="4"
+            android:layout_width="0px"
             android:layout_height="wrap_content">
         </Spinner>
-        <TextView
-            android:text="Order"
-            android:textSize="15sp"
-            android:layout_gravity="center"
-            android:layout_weight="3"
-            android:textAlignment="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
         <Spinner
             android:id="@+id/order_spinner"
-            android:layout_width="wrap_content"
+            android:textAlignment="center"
+            android:layout_weight="5"
+            android:layout_width="0px"
             android:layout_height="wrap_content">
-
         </Spinner>
 
     </LinearLayout>
-    <ListView
-        android:id="@+id/favorite_list"
-        android:background="@color/white"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </ListView>
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:gravity="center_vertical|center_horizontal" >
+        <ListView
+            android:id="@+id/favorite_list"
+            android:background="@color/white"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </ListView>
+        <ProgressBar
+            android:id="@+id/search_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/black"
+            android:layout_gravity="center_vertical|center_horizontal" />
+    </FrameLayout>
+
 
 
 

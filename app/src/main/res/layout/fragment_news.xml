@@ -2,10 +2,34 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ListView
-        android:id="@+id/news_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </ListView>
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:gravity="center_vertical|center_horizontal" >
+        <ListView
+            android:id="@+id/news_list"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </ListView>
+        <ProgressBar
+            android:id="@+id/news_progress_bar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/black"
+            android:visibility="visible"
+            android:layout_gravity="center_vertical|center_horizontal" />
+        <TextView
+            android:id="@+id/news_error_msg"
+            android:text="Fail to load news."
+            android:textColor="@color/black"
+            android:visibility="invisible"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
 
 </RelativeLayout>

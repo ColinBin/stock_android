@@ -3,6 +3,330 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:weightSum="6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="Stock Details"
+                    android:textColor="@color/black"
+                    android:layout_weight="4"
+                    android:textSize="25sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <LinearLayout
+                    android:gravity="end"
+                    android:layout_weight="2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <ImageButton
+                        android:id="@+id/facebook_button"
+                        android:layout_gravity="center"
+                        android:background="@drawable/facebook"
+                        android:layout_height="35sp"
+                        android:layout_width="35sp"
+                        />
+                    <ImageButton
+                        android:id="@+id/favorite_button"
+                        android:layout_marginStart="15dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/empty"
+                        android:layout_height="35sp"
+                        android:layout_width="35sp"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:gravity="center_vertical|center_horizontal" >
+                <TableLayout
+                    android:id="@+id/detail_table"
+                    android:divider="?android:attr/dividerHorizontal"
+                    android:showDividers="middle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        >
+                        <TextView
+                            android:layout_weight="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Stock Symbol"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_symbol"
+                            android:textColor="@color/black"
+                            android:text="Sample Symbol"
+                            />
+                        <TextView
+                            android:layout_weight="2"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        >
+                        <TextView
+                            android:layout_weight="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Last Price"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_price"
+                            android:textColor="@color/black"
+                            android:text="Sample Price"
+                            />
+                        <TextView
+                            android:layout_weight="2"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp">
+                        <TextView
+                            android:layout_weight="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Change"
+                            />
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_change"
+                            android:textColor="@color/black"
+                            android:text="Sample Change"
+                            />
+                        <ImageView
+                            android:id="@+id/detail_arrow"
+                            android:layout_gravity="start"
+                            android:scaleType="fitStart"
+                            android:layout_weight="2"
+                            android:adjustViewBounds="true"
+                            android:maxHeight="20dp"
+                            android:maxWidth="20dp"
+                            android:src="@drawable/up"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        >
+                        <TextView
+                            android:layout_weight="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Timestamp"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_timestamp"
+                            android:textColor="@color/black"
+                            android:text="Sample timestamp"
+                            />
+                        <TextView
+                            android:layout_weight="2"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        >
+                        <TextView
+                            android:layout_weight="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Open"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_open"
+                            android:textColor="@color/black"
+                            android:text="Sample Open"
+                            />
+                        <TextView
+                            android:layout_weight="2"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        >
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_close_prev"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Close"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_close"
+                            android:textColor="@color/black"
+                            android:text="Sample Close"
+                            />
+                        <TextView
+                            android:layout_weight="2"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        >
+                        <TextView
+                            android:layout_weight="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Day's Range"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_range"
+                            android:textColor="@color/black"
+                            android:text="Sample Range"
+                            />
+                        <TextView
+                            android:layout_weight="2"
+                            />
+                    </TableRow>
+                    <TableRow
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        >
+                        <TextView
+                            android:layout_weight="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="Volume"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/detail_volume"
+                            android:textColor="@color/black"
+                            android:text="Sample Volume"
+                            />
+                        <TextView
+                            android:layout_weight="2"
+                            />
+                    </TableRow>
+                </TableLayout>
+                <ProgressBar
+                    android:id="@+id/detail_progress_bar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible"
+                    android:indeterminateTint="@color/black"
+                    android:layout_gravity="center_vertical|center_horizontal" />
+                <TextView
+                    android:id="@+id/detail_error_msg"
+                    android:text="Failed to load data."
+                    android:textColor="@color/black"
+                    android:visibility="invisible"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+
+            <LinearLayout
+                android:weightSum="3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="Indicators"
+                    android:textColor="@color/black"
+                    android:textAlignment="center"
+                    android:layout_weight="1"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Spinner
+                    android:id="@+id/indicator_spinner"
+                    android:entries="@array/indicator_array"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                </Spinner>
+                <TextView
+                    android:textColor="@color/black"
+                    android:id="@+id/change_indicator_button"
+                    android:layout_weight="1"
+                    android:text="Change"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:gravity="center_vertical|center_horizontal" >
+                <WebView
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                </WebView>
+                <ProgressBar
+                    android:id="@+id/indicator_progress_bar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible"
+                    android:indeterminateTint="@color/black"
+                    android:layout_gravity="center_vertical|center_horizontal" />
+                <TextView
+                    android:id="@+id/indicator_error_msg"
+                    android:text="Fail to load chart."
+                    android:textColor="@color/black"
+                    android:visibility="invisible"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 
 </RelativeLayout>

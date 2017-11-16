@@ -1,4 +1,4 @@
-package com.extreme.colin.stock;
+package com.extreme.colin.stock.adaptor;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
