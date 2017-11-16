@@ -31,5 +31,12 @@ public class MyComparators  {
             return Double.compare(f1.getChangePercent(), f2.getChangePercent());
         }
     };
+    public static Comparator<Favorite> compareAddedTimestamp=new Comparator<Favorite>() {
+        @Override
+        public int compare(Favorite f1, Favorite f2) {
+            return Double.compare(f1.getAddedTimestamp(), f2.getAddedTimestamp());
+        }
+    };
+
 
 }

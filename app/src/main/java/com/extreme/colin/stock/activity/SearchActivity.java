@@ -75,7 +75,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     JSONArray favoriteJSONArray;
 
     List<Favorite> favoriteList;
-    List<Favorite> favoriteListForDisplay;
     FavoriteAdaptor favoriteAdaptor;
 
     RequestQueue queue;
@@ -234,8 +233,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         try {
             favoriteJSONArray = new JSONArray(sharedPref.getString("favorite_list", "[]"));
             favoriteList = MyOperations.parseFavoriteList(favoriteJSONArray);
-            favoriteListForDisplay = favoriteList;
-            favoriteAdaptor = new FavoriteAdaptor(this, R.layout.favorite_item, favoriteListForDisplay);
+            Collections.sort(favoriteList, MyComparators.compareAddedTimestamp);
+            favoriteAdaptor = new FavoriteAdaptor(this, R.layout.favorite_item, favoriteList);
             favoriteListView.setAdapter(favoriteAdaptor);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -262,11 +261,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
                 int selectedPosition = info.position;
                 // remove from local storage
-                String symbol = favoriteList.get(selectedPosition).getSymbol();
-                removeFromLocal(symbol);
                 // update list view UI
                 favoriteList.remove(selectedPosition);
-                favoriteListForDisplay = favoriteList;
+                updateArrayAndWriteToLocal();
                 favoriteAdaptor.notifyDataSetChanged();
                 return true;
             default:
@@ -274,23 +271,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    private void removeFromLocal(String symbol) {
-        // update local storage
-
-        try {
-            for(int i = 0; i < favoriteJSONArray.length(); ++i) {
-                if(symbol.equals(favoriteJSONArray.getJSONObject(i).getString("symbol"))) {
-                    favoriteJSONArray.remove(i);
-                    break;
-                }
-            }
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-        editor = sharedPref.edit();
-        editor.putString("favorite_list", favoriteJSONArray.toString());
-        editor.apply();
-    }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -303,23 +283,23 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         switch(sortByCurrentSelectedPosition) {
             case 1:
                 //default
-                favoriteListForDisplay = favoriteList;
+                Collections.sort(favoriteList, MyComparators.compareAddedTimestamp);
                 break;
             case 2:
                 // symbol
-                Collections.sort(favoriteListForDisplay, MyComparators.compareSymbol);
+                Collections.sort(favoriteList, MyComparators.compareSymbol);
                 break;
             case 3:
                 // price
-                Collections.sort(favoriteListForDisplay, MyComparators.comparePrice);
+                Collections.sort(favoriteList, MyComparators.comparePrice);
                 break;
             case 4:
                 // change
-                Collections.sort(favoriteListForDisplay, MyComparators.compareChange);
+                Collections.sort(favoriteList, MyComparators.compareChange);
                 break;
             case 5:
                 // change percent
-                Collections.sort(favoriteListForDisplay, MyComparators.compareChangePercent);
+                Collections.sort(favoriteList, MyComparators.compareChangePercent);
                 break;
             default:
                 break;
@@ -327,7 +307,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         }
         // if not default and descending is selected
         if(orderCurrentSelectedPosition == 2 && sortByCurrentSelectedPosition != 1 && sortByCurrentSelectedPosition != 0) {
-            Collections.reverse(favoriteListForDisplay);
+            Collections.reverse(favoriteList);
         }
         favoriteAdaptor.notifyDataSetChanged();
     }
@@ -336,4 +316,33 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
+
+
+    private void updateArrayAndWriteToLocal() {
+        // construct a new array based on list
+        favoriteJSONArray = new JSONArray();
+        for(int i = 0; i < favoriteList.size(); ++i) {
+            favoriteJSONArray.put(favoriteList.get(i).toJson());
+        }
+        // write to local storage
+        editor = sharedPref.edit();
+        editor.putString("favorite_list", favoriteJSONArray.toString());
+        editor.apply();
+    }
+
+    private void updateFavorite(Favorite favorite) {
+        // find the symbol being updated and update the list
+        String symbol = favorite.getSymbol();
+        for(int i = 0; i < favoriteList.size(); ++i) {
+            if(favoriteList.get(i).getSymbol().equals(symbol)) {
+                favoriteList.set(i, favorite);
+                break;
+            }
+        }
+        // update UI
+        favoriteAdaptor.notifyDataSetChanged();
+        // update local storage
+        updateArrayAndWriteToLocal();
+    }
+
 }

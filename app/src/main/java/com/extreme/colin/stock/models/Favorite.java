@@ -20,6 +20,10 @@ public class Favorite implements Serializable{
     private double changePercent;
     private String changeAndPercent;
 
+
+
+    private long addedTimestamp;
+
     public Favorite(String symbol, double price, String priceStr, double change, double changePercent, String changeAndPercent) {
         this.symbol = symbol;
         this.price = price;
@@ -27,6 +31,7 @@ public class Favorite implements Serializable{
         this.change = change;
         this.changePercent = changePercent;
         this.changeAndPercent = changeAndPercent;
+        addedTimestamp = System.currentTimeMillis() / 1000L;
     }
 
     public Favorite(JSONObject jsonObject) {
@@ -37,6 +42,7 @@ public class Favorite implements Serializable{
             change = jsonObject.getDouble("change");
             changePercent = jsonObject.getDouble("changePercent");
             changeAndPercent = jsonObject.getString("changeAndPercent");
+            addedTimestamp = jsonObject.getLong("addedTimestamp");
         }catch (Exception exception) {
             Log.e(TAG, exception.toString());
         }
@@ -51,6 +57,7 @@ public class Favorite implements Serializable{
             self.put("change", change);
             self.put("changePercent", changePercent);
             self.put("changeAndPercent", changeAndPercent);
+            self.put("addedTimestamp", addedTimestamp);
         } catch (Exception exception) {
             Log.e(TAG, exception.toString());
         }
@@ -79,5 +86,9 @@ public class Favorite implements Serializable{
 
     public String getChangeAndPercent() {
         return changeAndPercent;
+    }
+
+    public long getAddedTimestamp() {
+        return addedTimestamp;
     }
 }
