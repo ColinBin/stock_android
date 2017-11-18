@@ -5,8 +5,9 @@
     <string name="tab_text_3">Tab 3</string>
     <string name="action_settings">Settings</string>
 
-
+    facebook_app_id
     <string name="sort_by_prompt">Sort by</string>
+    <string name="facebook_app_id">147422066013338</string>
     <string name="order_prompt">Order</string>
     <string-array name="sort_by_array">
         <item>Default</item>

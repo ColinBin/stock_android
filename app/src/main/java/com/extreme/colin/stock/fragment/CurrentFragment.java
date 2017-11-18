@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -48,6 +49,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 
 /**
  * Created by colin on 12/11/2017.
@@ -116,6 +125,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 1:
+                    indicatorState = MyOperations.SUCCESS;
                     setIndicatorUIState(MyOperations.SUCCESS);
                     break;
                 default:
@@ -124,10 +134,36 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         }
     };
 
+    // facebook
+    ShareDialog shareDialog;
+    CallbackManager callbackManager;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_current, container, false);
+
+        // facebook
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+
+            @Override
+            public void onSuccess(Sharer.Result result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+
 
         // components of the detail table
         detailSymbol = view.findViewById(R.id.detail_symbol);
@@ -293,9 +329,11 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         ((DetailActivity) getActivity()).addRequest(detailRequest);
 
         // initially fetch Price data and disable change button
-        fetchIndicatorAndReload("Price");
-        indicatorSelectedIndex = 0;
-        indicatorRenderedIndex = 0;
+        // but when the fragment reloads after the screen blacks out, the indicator may not be Price
+        int selectedIndex = (int)indicatorSpinner.getSelectedItemId();
+        String selectedIndicatorType = indicatorTypeStrList[selectedIndex];
+        fetchIndicatorAndReload(selectedIndicatorType);
+        indicatorSelectedIndex = indicatorRenderedIndex = selectedIndex;
         setChangeButtonState();
 
     }
@@ -304,6 +342,15 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.facebook_button:
+                if(indicatorState == MyOperations.SUCCESS) {
+                    // post to back end with options data and get back the url for facebook SDK
+                    fetchImageUrlAndShare();
+
+                } else if(indicatorState == MyOperations.IN_PROGRESS) {
+                    MyOperations.makeToast(getActivity(), "Chart is in progress, cannot share.");
+                } else {
+                    MyOperations.makeToast(getActivity(), "Chart is in error, cannot share.");
+                }
                 break;
             case R.id.favorite_button:
                 // only valid when detail are successfully retrieved
@@ -414,6 +461,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
 
     private void fetchIndicatorAndReload(final String option) {
         setIndicatorUIState(MyOperations.IN_PROGRESS);
+        indicatorState = MyOperations.IN_PROGRESS;
 
         // clear view to avoid blink of previous chart
         indicatorWebView.loadUrl("about:blank");
@@ -462,6 +510,54 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
                 });
         indicatorRequest.setTag(MyOperations.INDICATOR_REQUEST);
         ((DetailActivity) getActivity()).addRequest(indicatorRequest);
+    }
+
+    private void fetchImageUrlAndShare() {
+        // construct request data for export
+        JSONObject requestData = new JSONObject();
+        try {
+            requestData.put("data", chartOptions.toString());
+            requestData.put("filename", "hello");
+            requestData.put("type", "image/png");
+            requestData.put("async", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
+        JsonObjectRequest exportRequest = new JsonObjectRequest
+                (Request.Method.POST, MyOperations.baseUrl, requestData, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "onResponse: " + response.toString());
+                        try {
+                            if (response.getInt("status_code") == 200 && !response.isNull("image_identity")) {
+                                String imageIdentity = response.getString("image_identity");
+                                String fullUrl = MyOperations.exportUrl + imageIdentity;
+
+                                ShareLinkContent content = new ShareLinkContent.Builder()
+                                        .setContentUrl(Uri.parse(fullUrl))
+                                        .build();
+                                shareDialog.show(content);
+                            } else {
+                            }
+                        } catch (Exception exp) {
+                            Log.e(TAG, exp.toString());
+                            // only show error msg
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //only show error msg
+                        Log.d(TAG, "onErrorResponse: " + error.toString());
+                    }
+
+                });
+        exportRequest.setTag(MyOperations.EXPORT_REQUEST);
+        ((DetailActivity) getActivity()).addRequest(exportRequest);
     }
 
     private void setChangeButtonState() {
