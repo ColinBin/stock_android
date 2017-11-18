@@ -244,6 +244,8 @@
                             android:layout_weight="2"
                             />
                     </TableRow>
+                    <TableRow>
+                    </TableRow>
                 </TableLayout>
                 <ProgressBar
                     android:id="@+id/detail_progress_bar"
@@ -251,7 +253,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="visible"
-                    android:indeterminateTint="@color/black"
                     android:layout_gravity="center_vertical|center_horizontal" />
                 <TextView
                     android:id="@+id/detail_error_msg"
@@ -298,13 +299,15 @@
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:minHeight="150dp"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:gravity="center_vertical|center_horizontal" >
                 <WebView
+                    android:id="@+id/indicator_web_view"
+                    android:layout_marginTop="15sp"
                     android:visibility="invisible"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
+                    android:layout_height="match_parent">
                 </WebView>
                 <ProgressBar
                     android:id="@+id/indicator_progress_bar"
@@ -312,7 +315,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="visible"
-                    android:indeterminateTint="@color/black"
                     android:layout_gravity="center_vertical|center_horizontal" />
                 <TextView
                     android:id="@+id/indicator_error_msg"

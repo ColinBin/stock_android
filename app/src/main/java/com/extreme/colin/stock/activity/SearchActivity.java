@@ -16,6 +16,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -88,9 +90,11 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     // when back end responds, it gets decremented, when 0, not show progress bar and update list
     private int dueCount = 0;
 
+    // Autocomplete
     private AutoCompleteAdapter autoCompleteAdapter;
     List<Hint> hints;
     private boolean isJustSelected = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,14 +120,12 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         favoriteListView.setOnItemClickListener(this);
         registerForContextMenu(favoriteListView);
 
+        // configure autocomplete
         hints = new ArrayList<>();
-
         autoCompleteAdapter = new AutoCompleteAdapter(this, R.layout.hint_item, hints);
         autoCompleteInputView.setAdapter(autoCompleteAdapter);
         autoCompleteInputView.setThreshold(1);
-
         autoCompleteInputView.addTextChangedListener(this);
-
         autoCompleteInputView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -150,7 +152,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        // logic for two spinners
+        // configure spinners
+        configureSpinners();
+        sortBySpinner.setOnItemSelectedListener(this);
+        orderSpinner.setOnItemSelectedListener(this);
+    }
+
+    private void configureSpinners() {
         String[] sortByStrList = new String[]{
                 "Sort by",
                 "Default",
@@ -183,7 +191,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 //        ArrayAdapter<CharSequence> sortByAdapter = ArrayAdapter.createFromResource(this, R.array.sort_by_array, android.R.layout.simple_spinner_item);
         sortByAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortBySpinner.setAdapter(sortByAdapter);
-        sortBySpinner.setOnItemSelectedListener(this);
 
         String[] orderStrList = new String[]{
                 "Order",
@@ -212,9 +219,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         };
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         orderSpinner.setAdapter(orderAdapter);
-        orderSpinner.setOnItemSelectedListener(this);
-
     }
+
 
     Runnable mFavoriteRefresher = new Runnable() {
         @Override

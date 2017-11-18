@@ -1,16 +1,23 @@
 package com.extreme.colin.stock.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.Image;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -29,6 +36,7 @@ import com.android.volley.toolbox.Volley;
 import com.extreme.colin.stock.MyOperations;
 import com.extreme.colin.stock.R;
 import com.extreme.colin.stock.activity.DetailActivity;
+import com.extreme.colin.stock.activity.SearchActivity;
 import com.extreme.colin.stock.adaptor.NewsAdaptor;
 import com.extreme.colin.stock.models.Favorite;
 
@@ -36,12 +44,15 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by colin on 12/11/2017.
  */
+
 
 public class CurrentFragment extends Fragment implements View.OnClickListener {
 
@@ -56,6 +67,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     private ProgressBar indicatorProgressBar;
     private TextView detailErrorMsg;
     private TextView indicatorErrorMsg;
+    private WebView indicatorWebView;
 
     private TextView detailSymbol;
     private TextView detailPrice;
@@ -81,6 +93,36 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     SharedPreferences.Editor editor;
 
     JSONArray favoriteJSONArray;
+
+    JSONObject chartOptions;
+    private int indicatorSelectedIndex;
+    private int indicatorRenderedIndex;
+
+    String[] indicatorTypeStrList = new String[]{
+            "Price",
+            "SMA",
+            "EMA",
+            "MACD",
+            "RSI",
+            "ADX",
+            "CCI",
+            "BBANDS"
+    };
+
+
+    // TODO avoid warnings
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    setIndicatorUIState(MyOperations.SUCCESS);
+                    break;
+                default:
+
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -115,9 +157,67 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         facebookButton.setOnClickListener(this);
         favoriteButton.setOnClickListener(this);
         changeIndicatorButton.setOnClickListener(this);
+        indicatorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                indicatorSelectedIndex = i;
+                setChangeButtonState();
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        // configure indicator WebView
+        indicatorWebView = view.findViewById(R.id.indicator_web_view);
+        indicatorWebView.getSettings().setJavaScriptEnabled(true);
 
         return view;
+    }
+
+    private void configureSpinner() {
+        final List<String> indicatorTypeList = new ArrayList<>(Arrays.asList(indicatorTypeStrList));
+        ArrayAdapter<String> indicatorAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, indicatorTypeList);
+        indicatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        indicatorSpinner.setAdapter(indicatorAdapter);
+    }
+
+    class javascriptObject {
+        JSONObject jsonObject;
+        String type;
+
+        private javascriptObject(JSONObject object, String type) {
+            this.jsonObject = object;
+            this.type = type;
+        }
+        @JavascriptInterface
+        public String getStrData() {
+            return jsonObject.toString();
+        }
+        @JavascriptInterface
+        public String getType() {
+            return type;
+        }
+        @JavascriptInterface
+        public void readyToDisplay(String optionStr) {
+            // when the chart is rendered, set UI state and assign chart options for facebook post
+            Message msg = new Message();
+            msg.what = 1;
+            mHandler.sendMessage(msg);
+            indicatorState = MyOperations.SUCCESS;
+            try {
+                chartOptions = new JSONObject(optionStr);
+            } catch (Exception e) {
+                Log.d(TAG, "readyToDisplay: " + e.toString());
+            }
+        }
+        @JavascriptInterface
+        public void notifyAndroid(String msg) {
+            Log.d(TAG, "notifyAndroid: " + msg);
+        }
+
     }
 
     @Override
@@ -146,24 +246,24 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         // TODO change star pic after getting data from back end
         setFavoriteButtonImage();
 
-
+        // set UI state
         detailState = MyOperations.IN_PROGRESS;
         indicatorState = MyOperations.IN_PROGRESS;
 
-        setDetailUIState(MyOperations.IN_PROGRESS);
-        setIndicatorUIState(MyOperations.IN_PROGRESS);
 
+
+        // request detail data
+        setDetailUIState(MyOperations.IN_PROGRESS);
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("symbol", symbolInput);
         params.put("type", "stock_detail");
         String url = MyOperations.makeUrl(params);
-
         JsonObjectRequest detailRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            if (response.getInt("status_code") == 200) {
+                            if (response.getInt("status_code") == 200 && !response.isNull("data")) {
                                 JSONObject detailData = response.getJSONObject("data");
                                 displayDetailResult(detailData);
                                 setDetailUIState(MyOperations.SUCCESS);
@@ -192,6 +292,12 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
                 });
         ((DetailActivity) getActivity()).addRequest(detailRequest);
 
+        // initially fetch Price data and disable change button
+        fetchIndicatorAndReload("Price");
+        indicatorSelectedIndex = 0;
+        indicatorRenderedIndex = 0;
+        setChangeButtonState();
+
     }
 
     @Override
@@ -211,6 +317,9 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
                 }
                 break;
             case R.id.change_indicator_button:
+                indicatorRenderedIndex = indicatorSelectedIndex;
+                setChangeButtonState();
+                fetchIndicatorAndReload(indicatorTypeStrList[indicatorSelectedIndex]);
                 break;
             default:
                 break;
@@ -260,12 +369,10 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
             setDetailUIState(MyOperations.ERROR);
             detailState = MyOperations.ERROR;
         }
-
     }
 
     private void toggleFavorite() {
         try {
-
             if(isCurrentFavorite) {
                 // TODO optimize to avoid search every time
                 for(int i = 0; i < favoriteJSONArray.length(); ++i) {
@@ -274,10 +381,8 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
                         break;
                     }
                 }
-
             } else {
                 favoriteJSONArray.put(currentStock.toJson());
-
             }
             // update local storage
             editor = sharedPref.edit();
@@ -288,7 +393,6 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         }catch (Exception exp) {
             Log.e(TAG, exp.toString());
         }
-
     }
 
 
@@ -297,7 +401,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     }
 
     private void setIndicatorUIState(int state) {
-
+        MyOperations.setUIState(indicatorWebView, indicatorProgressBar, indicatorErrorMsg, state);
     }
 
     private void setFavoriteButtonImage() {
@@ -305,6 +409,68 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
             favoriteButton.setImageResource(R.drawable.filled);
         } else {
             favoriteButton.setImageResource(R.drawable.empty);
+        }
+    }
+
+    private void fetchIndicatorAndReload(final String option) {
+        setIndicatorUIState(MyOperations.IN_PROGRESS);
+
+        // clear view to avoid blink of previous chart
+        indicatorWebView.loadUrl("about:blank");
+
+        // if there are previous indicator requests, clear them first
+        ((DetailActivity)getActivity()).removeRequest(MyOperations.INDICATOR_REQUEST);
+
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("symbol", symbolInput);
+        params.put("type", "indicator");
+        params.put("option", option);
+        String url = MyOperations.makeUrl(params);
+
+        JsonObjectRequest indicatorRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (response.getInt("status_code") == 200 && !response.isNull("data")) {
+                                JSONObject indicatorData = response.getJSONObject("data");
+
+                                // load the web view, when finishes, change UI through handler
+                                indicatorWebView.addJavascriptInterface(new javascriptObject(indicatorData, option), "injectedObject");
+                                indicatorWebView.loadUrl("file:///android_asset/indicator.html");
+                            } else {
+                                setIndicatorUIState(MyOperations.ERROR);
+                                indicatorState = MyOperations.ERROR;
+                            }
+                        } catch (Exception exp) {
+                            Log.e(TAG, exp.toString());
+                            // only show error msg
+                            setIndicatorUIState(MyOperations.ERROR);
+                            indicatorState = MyOperations.ERROR;
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //only show error msg
+                        setIndicatorUIState(MyOperations.ERROR);
+                        indicatorState = MyOperations.ERROR;
+                    }
+
+                });
+        indicatorRequest.setTag(MyOperations.INDICATOR_REQUEST);
+        ((DetailActivity) getActivity()).addRequest(indicatorRequest);
+    }
+
+    private void setChangeButtonState() {
+        if(indicatorSelectedIndex != indicatorRenderedIndex) {
+            changeIndicatorButton.setClickable(true);
+            changeIndicatorButton.setTextColor(Color.BLACK);
+        } else {
+            changeIndicatorButton.setClickable(false);
+            changeIndicatorButton.setTextColor(Color.GRAY);
         }
     }
 }

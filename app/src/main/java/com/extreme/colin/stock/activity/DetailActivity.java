@@ -79,6 +79,9 @@ public class DetailActivity extends AppCompatActivity {
         queue.add(request);
     }
 
+    public void removeRequest(int tag) {
+        queue.cancelAll(tag);
+    }
 
     @Override
     public void onBackPressed() {

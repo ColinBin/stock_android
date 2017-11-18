@@ -42,6 +42,10 @@ public class MyOperations {
 
     public static final int AUTOCOMPLETE_REQUEST = 222;
 
+    public static final int INDICATOR_REQUEST = 333;
+
+    public static final int HISTORY_REQUEST = 444;
+
 
     public static void makeToast(Activity activity, String msg) {
         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
