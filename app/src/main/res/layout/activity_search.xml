@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/background_repeat"
     android:orientation="vertical"
-    android:focusableInTouchMode="true"
     >
     <TextView
         android:textAlignment="center"
@@ -16,6 +15,7 @@
         android:layout_height="wrap_content" />
     <AutoCompleteTextView
         android:id="@+id/search_text"
+        android:textColor="@color/white"
         android:textAlignment="center"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"

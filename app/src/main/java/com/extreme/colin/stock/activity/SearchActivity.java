@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.FaceDetector;
-import android.media.Image;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +12,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -45,21 +40,18 @@ import com.extreme.colin.stock.adaptor.FavoriteAdaptor;
 import com.extreme.colin.stock.models.Favorite;
 import com.extreme.colin.stock.models.Hint;
 import com.extreme.colin.stock.models.MyComparators;
-import com.extreme.colin.stock.models.News;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class SearchActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemSelectedListener {
+public class SearchActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemSelectedListener, TextWatcher {
 
     private static final String TAG = "SearchActivity";
     // UI component
@@ -97,6 +89,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     private int dueCount = 0;
 
     private AutoCompleteAdapter autoCompleteAdapter;
+    List<Hint> hints;
+    private boolean isJustSelected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,14 +116,21 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         favoriteListView.setOnItemClickListener(this);
         registerForContextMenu(favoriteListView);
 
-        autoCompleteAdapter = new AutoCompleteAdapter(this);
+        hints = new ArrayList<>();
+
+        autoCompleteAdapter = new AutoCompleteAdapter(this, R.layout.hint_item, hints);
         autoCompleteInputView.setAdapter(autoCompleteAdapter);
         autoCompleteInputView.setThreshold(1);
+
+        autoCompleteInputView.addTextChangedListener(this);
+
         autoCompleteInputView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                isJustSelected = true;
+
                 Hint curr = (Hint) adapterView.getItemAtPosition(i);
-                autoCompleteInputView.setText(curr.getSymbol());
+                autoCompleteInputView.setText(curr.getFullDescription());
                 autoCompleteInputView.setSelection(autoCompleteInputView.getText().length());
             }
         });
@@ -141,7 +142,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 if(b) {
                     mHandler.postDelayed(mFavoriteRefresher, MyOperations.INTERVAL);
                 } else {
-                    queue.cancelAll(MyOperations.DETAILREQUEST);
+                    queue.cancelAll(MyOperations.DETAIL_REQUEST);
                     dueCount = 0;
                     searchProgressBar.setVisibility(View.INVISIBLE);
                     stopRefreshing();
@@ -219,7 +220,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         public void run() {
             try {
-                queue.cancelAll(MyOperations.DETAILREQUEST);
+                queue.cancelAll(MyOperations.DETAIL_REQUEST);
                 dueCount = 0;
                 searchProgressBar.setVisibility(View.VISIBLE);
                 refreshFavorite();
@@ -250,6 +251,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 if(TextUtils.isEmpty(symbolInput)) {
                     MyOperations.makeToast(this, "Please enter a stock name or symbol");
                     return;
+                }
+                if(symbolInput.contains(" ")) {
+                    symbolInput = symbolInput.substring(0, symbolInput.indexOf(" "));
                 }
                 StartSearchEndSelf(symbolInput);
                 break;
@@ -389,8 +393,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                             try {
                                 // TODO make sure dueCount is accessed by one request once
                                 --dueCount;
-
-                                Log.d(TAG, response.toString());
                                 if (response.getInt("status_code") == 200) {
 
                                     if(!response.isNull("data")) {
@@ -432,7 +434,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         }
 
                     });
-            detailRequest.setTag(MyOperations.DETAILREQUEST);
+            detailRequest.setTag(MyOperations.DETAIL_REQUEST);
             queue.add(detailRequest);
         }
 
@@ -466,9 +468,61 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    public List<Hint> getHintBasedOnInput(String input) {
-        List<Hint> result = new ArrayList<>();
-        return result;
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
     }
 
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        String currentInput = editable.toString().trim();
+        if(!currentInput.equals("") && !currentInput.contains("Hint@")) {
+            if(isJustSelected) {
+                isJustSelected = false;
+                return;
+            }
+
+            searchProgressBar.setVisibility(View.VISIBLE);
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put("symbol", currentInput);
+            params.put("type", "autocomplete");
+            String url = MyOperations.makeUrl(params);
+            JsonObjectRequest autoCompleteRequest = new JsonObjectRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                if(!response.isNull("status_code") && response.getInt("status_code") == 200 && !response.isNull("data")) {
+                                    JSONArray autoCompleteData = response.getJSONArray("data");
+                                    hints.clear();
+                                    hints.addAll(MyOperations.parseHintList(autoCompleteData));
+                                    autoCompleteAdapter.notifyDataSetChanged();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+
+                            } finally {
+                                // TODO check whether the queue is empty before hide the progress bar
+                                searchProgressBar.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            searchProgressBar.setVisibility(View.INVISIBLE);
+                            Log.e(TAG, "onErrorResponse: " + error.toString());
+                        }
+
+                    });
+            autoCompleteRequest.setTag(MyOperations.AUTOCOMPLETE_REQUEST);
+            queue.add(autoCompleteRequest);
+        }
+    }
 }

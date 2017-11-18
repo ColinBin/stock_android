@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.extreme.colin.stock.models.Favorite;
+import com.extreme.colin.stock.models.Hint;
 import com.extreme.colin.stock.models.News;
 
 import org.json.JSONArray;
@@ -29,7 +30,7 @@ public class MyOperations {
 
     private static final String baseUrl = "http://stock-homework9.us-east-1.elasticbeanstalk.com/";
 
-    public static final int INPROGRESS = -1;
+    public static final int IN_PROGRESS = -1;
 
     public static final int ERROR = 0;
 
@@ -37,7 +38,9 @@ public class MyOperations {
 
     public static final int INTERVAL = 5000;
 
-    public static final int DETAILREQUEST = 111;
+    public static final int DETAIL_REQUEST = 111;
+
+    public static final int AUTOCOMPLETE_REQUEST = 222;
 
 
     public static void makeToast(Activity activity, String msg) {
@@ -99,6 +102,18 @@ public class MyOperations {
             e.printStackTrace();
         }
         return favoriteList;
+    }
+    public static List<Hint> parseHintList(JSONArray hintArray) {
+        List<Hint> hintList = new ArrayList<>();
+        try {
+            for (int i = 0; i < hintArray.length(); ++i) {
+                Hint current = new Hint(hintArray.getJSONObject(i));
+                hintList.add(current);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return hintList;
     }
 
     public static Favorite getFavoriteFromJSONObject(JSONObject jsonObject) {

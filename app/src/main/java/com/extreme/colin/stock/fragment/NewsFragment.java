@@ -69,7 +69,7 @@ public class NewsFragment extends Fragment implements AdapterView.OnItemClickLis
     public void onStart() {
         super.onStart();
         // only show progress bar
-        setUIState(MyOperations.INPROGRESS);
+        setUIState(MyOperations.IN_PROGRESS);
         symbolInput = getActivity().getIntent().getStringExtra("symbol");
 
         // request data from backend

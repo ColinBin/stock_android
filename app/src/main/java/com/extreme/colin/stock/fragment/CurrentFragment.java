@@ -147,11 +147,11 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         setFavoriteButtonImage();
 
 
-        detailState = MyOperations.INPROGRESS;
-        indicatorState = MyOperations.INPROGRESS;
+        detailState = MyOperations.IN_PROGRESS;
+        indicatorState = MyOperations.IN_PROGRESS;
 
-        setDetailUIState(MyOperations.INPROGRESS);
-        setIndicatorUIState(MyOperations.INPROGRESS);
+        setDetailUIState(MyOperations.IN_PROGRESS);
+        setIndicatorUIState(MyOperations.IN_PROGRESS);
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("symbol", symbolInput);
