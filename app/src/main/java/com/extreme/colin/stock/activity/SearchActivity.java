@@ -8,6 +8,7 @@ import android.media.FaceDetector;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -31,53 +32,71 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.extreme.colin.stock.MyOperations;
 import com.extreme.colin.stock.R;
+import com.extreme.colin.stock.adaptor.AutoCompleteAdapter;
 import com.extreme.colin.stock.adaptor.FavoriteAdaptor;
 import com.extreme.colin.stock.models.Favorite;
+import com.extreme.colin.stock.models.Hint;
 import com.extreme.colin.stock.models.MyComparators;
 import com.extreme.colin.stock.models.News;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class SearchActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "SearchActivity";
-
-    private AutoCompleteTextView inputView;
-
+    // UI component
+    private AutoCompleteTextView autoCompleteInputView;
     private TextView searchButton;
     private TextView clearButton;
     private ImageButton refreshButton;
     private Switch autoRefreshSwitch;
     private ListView favoriteListView;
     private Spinner sortBySpinner;
-    private int sortByCurrentSelectedPosition = 1;
     private Spinner orderSpinner;
-    private int orderCurrentSelectedPosition = 1;
     private ProgressBar searchProgressBar;
+
+    private int sortByCurrentSelectedPosition = 1;
+    private int orderCurrentSelectedPosition = 1;
 
     private String symbolInput;
 
+    // for local storage
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
 
     JSONArray favoriteJSONArray;
-
     List<Favorite> favoriteList;
     FavoriteAdaptor favoriteAdaptor;
 
+    // Volley request queue
     RequestQueue queue;
+
+    // handler for repeated refresh
+    private Handler mHandler;
+
+    // the count of request for detail data, when each refresh fires, it gets incremented
+    // when back end responds, it gets decremented, when 0, not show progress bar and update list
+    private int dueCount = 0;
+
+    private AutoCompleteAdapter autoCompleteAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +105,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
         queue = Volley.newRequestQueue(this);
 
-        inputView = findViewById(R.id.search_text);
+        autoCompleteInputView = findViewById(R.id.search_text);
         searchButton = findViewById(R.id.search_button);
         clearButton = findViewById(R.id.clear_button);
         refreshButton = findViewById(R.id.refresh_button);
@@ -103,11 +122,30 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         favoriteListView.setOnItemClickListener(this);
         registerForContextMenu(favoriteListView);
 
+        autoCompleteAdapter = new AutoCompleteAdapter(this);
+        autoCompleteInputView.setAdapter(autoCompleteAdapter);
+        autoCompleteInputView.setThreshold(1);
+        autoCompleteInputView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Hint curr = (Hint) adapterView.getItemAtPosition(i);
+                autoCompleteInputView.setText(curr.getSymbol());
+                autoCompleteInputView.setSelection(autoCompleteInputView.getText().length());
+            }
+        });
+
         autoRefreshSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 // when checked, fire auto refresh
-                // when unchecked, cancel requests
+                if(b) {
+                    mHandler.postDelayed(mFavoriteRefresher, MyOperations.INTERVAL);
+                } else {
+                    queue.cancelAll(MyOperations.DETAILREQUEST);
+                    dueCount = 0;
+                    searchProgressBar.setVisibility(View.INVISIBLE);
+                    stopRefreshing();
+                }
             }
         });
 
@@ -177,10 +215,26 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    Runnable mFavoriteRefresher = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                queue.cancelAll(MyOperations.DETAILREQUEST);
+                dueCount = 0;
+                searchProgressBar.setVisibility(View.VISIBLE);
+                refreshFavorite();
+            } finally {
+
+                mHandler.postDelayed(mFavoriteRefresher, MyOperations.INTERVAL);
+            }
+        }
+    };
+
     @Override
     protected void onStart() {
         super.onStart();
         sharedPref = getSharedPreferences("stock_information", Context.MODE_PRIVATE);
+        mHandler = new Handler();
         // load local favorite list and render the favorite list view
         renderFavoriteListView();
         searchProgressBar.setVisibility(View.INVISIBLE);
@@ -191,7 +245,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.search_button:
-                symbolInput = inputView.getText().toString().trim();
+                symbolInput = autoCompleteInputView.getText().toString().trim();
                 // check whether input is valid
                 if(TextUtils.isEmpty(symbolInput)) {
                     MyOperations.makeToast(this, "Please enter a stock name or symbol");
@@ -201,11 +255,12 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             case R.id.clear_button:
                 // reset input to empty
-                inputView.setText("");
+                autoCompleteInputView.setText("");
                 break;
             case R.id.refresh_button:
                 // call back end for favorite symbols data
-
+                searchProgressBar.setVisibility(View.VISIBLE);
+                refreshFavorite();
                 break;
             default:
                 break;
@@ -274,7 +329,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
         if(adapterView.getId() == R.id.sort_by_spinner) {
             sortByCurrentSelectedPosition = i;
         } else if(adapterView.getId() == R.id.order_spinner) {
@@ -317,6 +371,77 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    private void refreshFavorite() {
+
+        int favoriteCount = favoriteList.size();
+        dueCount += favoriteCount;
+        for(int i = 0; i < favoriteCount; ++i) {
+            String symbol = favoriteList.get(i).getSymbol();
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put("symbol", symbol);
+            params.put("type", "stock_detail");
+            String url = MyOperations.makeUrl(params);
+
+            JsonObjectRequest detailRequest = new JsonObjectRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                // TODO make sure dueCount is accessed by one request once
+                                --dueCount;
+
+                                Log.d(TAG, response.toString());
+                                if (response.getInt("status_code") == 200) {
+
+                                    if(!response.isNull("data")) {
+                                        JSONObject detailData = response.getJSONObject("data");
+                                        updateFavoriteInList(MyOperations.getFavoriteFromJSONObject(detailData));
+                                    }
+
+                                }
+                                // if failed to fetch data, do nothing
+                            } catch (Exception e) {
+                                e.printStackTrace();
+
+                            } finally {
+                                // if no pending requests, hide progress bar and update list
+                                // and write to local
+                                if(dueCount == 0) {
+                                    // hide progress bar
+                                    searchProgressBar.setVisibility(View.INVISIBLE);
+                                    favoriteAdaptor.notifyDataSetChanged();
+                                    // update local storage
+                                    updateArrayAndWriteToLocal();
+                                }
+                            }
+
+                        }
+                    }, new Response.ErrorListener() {
+
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            --dueCount;
+                            if(dueCount == 0) {
+                                // hide progress bar
+                                searchProgressBar.setVisibility(View.INVISIBLE);
+                                favoriteAdaptor.notifyDataSetChanged();
+                                // update local storage
+                                updateArrayAndWriteToLocal();
+                            }
+                            Log.d(TAG, error.toString());
+                        }
+
+                    });
+            detailRequest.setTag(MyOperations.DETAILREQUEST);
+            queue.add(detailRequest);
+        }
+
+    }
+
+    private void stopRefreshing() {
+        mHandler.removeCallbacks(mFavoriteRefresher);
+    }
+
 
     private void updateArrayAndWriteToLocal() {
         // construct a new array based on list
@@ -330,7 +455,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         editor.apply();
     }
 
-    private void updateFavorite(Favorite favorite) {
+    private void updateFavoriteInList(Favorite favorite) {
         // find the symbol being updated and update the list
         String symbol = favorite.getSymbol();
         for(int i = 0; i < favoriteList.size(); ++i) {
@@ -339,10 +464,11 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             }
         }
-        // update UI
-        favoriteAdaptor.notifyDataSetChanged();
-        // update local storage
-        updateArrayAndWriteToLocal();
+    }
+
+    public List<Hint> getHintBasedOnInput(String input) {
+        List<Hint> result = new ArrayList<>();
+        return result;
     }
 
 }

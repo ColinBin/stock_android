@@ -253,15 +253,9 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
             } else {
                 detailArrow.setImageResource(R.drawable.down);
             }
+            // parse json data to Favorite object
+            currentStock = MyOperations.getFavoriteFromJSONObject(detailData);
 
-            currentStock = new Favorite(
-                    detailData.getString("symbol"),
-                    MyOperations.stripFormatDouble(lastPriceStr),
-                    lastPriceStr,
-                    changeValue,
-                    Double.parseDouble(detailData.getString("change_percent_num")),
-                    changeAndPercent
-            );
         } catch (Exception exception) {
             setDetailUIState(MyOperations.ERROR);
             detailState = MyOperations.ERROR;

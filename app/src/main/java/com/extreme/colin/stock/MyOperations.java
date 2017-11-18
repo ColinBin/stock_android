@@ -27,13 +27,17 @@ import static com.android.volley.VolleyLog.TAG;
 
 public class MyOperations {
 
-    private static final String baseUrl = "http://colinbin.us-east-1.elasticbeanstalk.com/";
+    private static final String baseUrl = "http://stock-homework9.us-east-1.elasticbeanstalk.com/";
 
     public static final int INPROGRESS = -1;
 
     public static final int ERROR = 0;
 
     public static final int SUCCESS = 1;
+
+    public static final int INTERVAL = 5000;
+
+    public static final int DETAILREQUEST = 111;
 
 
     public static void makeToast(Activity activity, String msg) {
