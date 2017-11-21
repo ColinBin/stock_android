@@ -115,7 +115,8 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
             "RSI",
             "ADX",
             "CCI",
-            "BBANDS"
+            "BBANDS",
+            "STOCH"
     };
 
 
@@ -193,6 +194,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         facebookButton.setOnClickListener(this);
         favoriteButton.setOnClickListener(this);
         changeIndicatorButton.setOnClickListener(this);
+        configureSpinner();
         indicatorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -205,6 +207,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
 
             }
         });
+
 
         // configure indicator WebView
         indicatorWebView = view.findViewById(R.id.indicator_web_view);
