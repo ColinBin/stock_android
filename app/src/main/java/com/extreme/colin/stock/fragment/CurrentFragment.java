@@ -2,6 +2,7 @@ package com.extreme.colin.stock.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.Image;
@@ -138,30 +139,27 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     // facebook
     ShareDialog shareDialog;
     CallbackManager callbackManager;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_current, container, false);
-
+        callbackManager = ((DetailActivity)getActivity()).getCallbackManager();
         // facebook
-        callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
         shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
-
             @Override
             public void onSuccess(Sharer.Result result) {
-
+                MyOperations.makeToast(getActivity(), "Sharing is successful.");
             }
 
             @Override
             public void onCancel() {
-
+                MyOperations.makeToast(getActivity(), "Sharing is cancelled.");
             }
 
             @Override
             public void onError(FacebookException error) {
-
+                MyOperations.makeToast(getActivity(), "Sharing error!");
             }
         });
 
@@ -333,9 +331,9 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
 
         // initially fetch Price data and disable change button
         // but when the fragment reloads after the screen blacks out, the indicator may not be Price
-        int selectedIndex = (int)indicatorSpinner.getSelectedItemId();
-        String selectedIndicatorType = indicatorTypeStrList[selectedIndex];
-        fetchIndicatorAndReload(selectedIndicatorType);
+        int selectedIndex = 0;
+        indicatorSpinner.setSelection(selectedIndex);
+        fetchIndicatorAndReload(indicatorTypeStrList[selectedIndex]);
         indicatorSelectedIndex = indicatorRenderedIndex = selectedIndex;
         setChangeButtonState();
 
@@ -532,7 +530,6 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
                 (Request.Method.POST, MyOperations.baseUrl, requestData, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, "onResponse: " + response.toString());
                         try {
                             if (response.getInt("status_code") == 200 && !response.isNull("image_identity")) {
                                 String imageIdentity = response.getString("image_identity");
@@ -541,7 +538,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
                                 ShareLinkContent content = new ShareLinkContent.Builder()
                                         .setContentUrl(Uri.parse(fullUrl))
                                         .build();
-                                shareDialog.show(content);
+                                shareDialog.show(content, ShareDialog.Mode.FEED);
                             } else {
                             }
                         } catch (Exception exp) {
@@ -571,5 +568,11 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
             changeIndicatorButton.setClickable(false);
             changeIndicatorButton.setTextColor(Color.GRAY);
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

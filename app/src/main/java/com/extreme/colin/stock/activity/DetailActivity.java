@@ -1,6 +1,7 @@
 package com.extreme.colin.stock.activity;
 
 import android.content.Intent;
+import android.media.FaceDetector;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -19,6 +20,8 @@ import com.extreme.colin.stock.fragment.HistoryFragment;
 import com.extreme.colin.stock.fragment.NewsFragment;
 import com.extreme.colin.stock.R;
 import com.extreme.colin.stock.adaptor.SectionsPagerAdapter;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -29,6 +32,9 @@ public class DetailActivity extends AppCompatActivity {
 
     RequestQueue queue;
 
+    CallbackManager callbackManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -37,6 +43,8 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         queue = Volley.newRequestQueue(this);
+
+        callbackManager = CallbackManager.Factory.create();
 
         Intent intent = getIntent();
         symbolInput = intent.getStringExtra("symbol");
@@ -54,12 +62,14 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
+
         mViewPager = findViewById(R.id.container);
         setupViewPager(mViewPager);
 
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
     }
+
 
     private void terminateThis() {
         Intent intent = new Intent(this, SearchActivity.class);
@@ -75,6 +85,14 @@ public class DetailActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
+    public CallbackManager getCallbackManager() {
+        if(!FacebookSdk.isInitialized()) {
+            FacebookSdk.sdkInitialize(this);
+        }
+
+        return callbackManager;
+    }
+
     public void addRequest(Request request) {
         queue.add(request);
     }
@@ -87,5 +105,11 @@ public class DetailActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         terminateThis();
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

@@ -145,5 +145,4 @@ public class HistoryFragment extends Fragment{
         MyOperations.setUIState(historyWebView, historyProgressBar, historyErrorMsg, state);
     }
 
-
 }

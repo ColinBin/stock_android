@@ -298,7 +298,7 @@
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:minHeight="150dp"
+                android:minHeight="300dp"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:gravity="center_vertical|center_horizontal" >
                 <WebView
