@@ -48,8 +48,11 @@ public class HistoryFragment extends Fragment{
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
-                case 1:
+                case MyOperations.WEB_VIEW_SUCCESS:
                     setHistoryUIState(MyOperations.SUCCESS);
+                    break;
+                case MyOperations.WEB_VIEW_FAILURE:
+                    setHistoryUIState(MyOperations.ERROR);
                     break;
                 default:
                     break;
@@ -79,59 +82,66 @@ public class HistoryFragment extends Fragment{
 
         setHistoryUIState(MyOperations.IN_PROGRESS);
 
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("symbol", symbolInput);
-        params.put("type", "stock_history");
-        String url = MyOperations.makeUrl(params);
-        JsonObjectRequest historyRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            if (response.getInt("status_code") == 200 && !response.isNull("data")) {
-                                JSONObject historyData = response.getJSONObject("data");
+        historyWebView.addJavascriptInterface(new javascriptObject(symbolInput), "injectedObject");
+        historyWebView.loadUrl("file:///android_asset/history.html");
 
-                                historyWebView.addJavascriptInterface(new javascriptObject(historyData), "injectedObject");
-                                historyWebView.loadUrl("file:///android_asset/history.html");
-                            } else {
-                                setHistoryUIState(MyOperations.ERROR);
-                            }
-                        } catch (Exception exp) {
-                            Log.e(TAG, exp.toString());
-                            // only show error msg
-                            setHistoryUIState(MyOperations.ERROR);
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //only show error msg
-                        setHistoryUIState(MyOperations.ERROR);
-                    }
-
-                });
-        historyRequest.setTag(MyOperations.HISTORY_REQUEST);
-        ((DetailActivity) getActivity()).addRequest(historyRequest);
+//        HashMap<String, String> params = new HashMap<String, String>();
+//        params.put("symbol", symbolInput);
+//        params.put("type", "stock_history");
+//        String url = MyOperations.makeUrl(params);
+//        JsonObjectRequest historyRequest = new JsonObjectRequest
+//                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        try {
+//                            if (response.getInt("status_code") == 200 && !response.isNull("data")) {
+//                                JSONObject historyData = response.getJSONObject("data");
+//
+//                                historyWebView.addJavascriptInterface(new javascriptObject(historyData), "injectedObject");
+//                                historyWebView.loadUrl("file:///android_asset/history.html");
+//                            } else {
+//                                setHistoryUIState(MyOperations.ERROR);
+//                            }
+//                        } catch (Exception exp) {
+//                            Log.e(TAG, exp.toString());
+//                            // only show error msg
+//                            setHistoryUIState(MyOperations.ERROR);
+//                        }
+//
+//                    }
+//                }, new Response.ErrorListener() {
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        //only show error msg
+//                        setHistoryUIState(MyOperations.ERROR);
+//                    }
+//
+//                });
+//        historyRequest.setTag(MyOperations.HISTORY_REQUEST);
+//        ((DetailActivity) getActivity()).addRequest(historyRequest);
     }
 
     class javascriptObject {
-        JSONObject jsonObject;
+        String symbol;
 
-        private javascriptObject(JSONObject object) {
-            this.jsonObject = object;
+        private javascriptObject(String symbol) {
+            this.symbol = symbol;
         }
         @JavascriptInterface
-        public String getStrData() {
-            return jsonObject.toString();
+        public String getSymbol() {
+            return symbol;
         }
-
         @JavascriptInterface
-        public void readyToDisplay() {
+        public void readyToDisplay(String feedback) {
             // when the chart is rendered, set UI state
             Message msg = new Message();
-            msg.what = 1;
+            if(feedback.equals("")) {
+                msg.what = MyOperations.WEB_VIEW_FAILURE;
+            } else {
+                msg.what = MyOperations.WEB_VIEW_SUCCESS;
+            }
+
             mHandler.sendMessage(msg);
         }
         @JavascriptInterface

@@ -126,10 +126,13 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case 1:
+                case MyOperations.WEB_VIEW_FAILURE:
+                    indicatorState = MyOperations.ERROR;
+                    setIndicatorUIState(MyOperations.ERROR);
+                    break;
+                case MyOperations.WEB_VIEW_SUCCESS:
                     indicatorState = MyOperations.SUCCESS;
                     setIndicatorUIState(MyOperations.SUCCESS);
-                    break;
                 default:
 
             }
@@ -222,33 +225,38 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     }
 
     class javascriptObject {
-        JSONObject jsonObject;
         String type;
+        String symbol;
 
-        private javascriptObject(JSONObject object, String type) {
-            this.jsonObject = object;
+        private javascriptObject(String symbol, String type) {
+            this.symbol = symbol;
             this.type = type;
         }
-        @JavascriptInterface
-        public String getStrData() {
-            return jsonObject.toString();
-        }
+
         @JavascriptInterface
         public String getType() {
             return type;
         }
         @JavascriptInterface
+        public String getSymbol() {
+            return symbol;
+        }
+
+        @JavascriptInterface
         public void readyToDisplay(String optionStr) {
-            // when the chart is rendered, set UI state and assign chart options for facebook post
             Message msg = new Message();
-            msg.what = 1;
-            mHandler.sendMessage(msg);
-            indicatorState = MyOperations.SUCCESS;
-            try {
-                chartOptions = new JSONObject(optionStr);
-            } catch (Exception e) {
-                Log.d(TAG, "readyToDisplay: " + e.toString());
+            if(optionStr.equals("")) {
+                msg.what = MyOperations.WEB_VIEW_FAILURE;
+            } else {
+                msg.what = MyOperations.WEB_VIEW_SUCCESS;
+                try {
+                    chartOptions = new JSONObject(optionStr);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+            // when the chart is rendered, set UI state and assign chart options for facebook post
+            mHandler.sendMessage(msg);
         }
         @JavascriptInterface
         public void notifyAndroid(String msg) {
@@ -330,13 +338,21 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         ((DetailActivity) getActivity()).addRequest(detailRequest);
 
         // initially fetch Price data and disable change button
-        // but when the fragment reloads after the screen blacks out, the indicator may not be Price
         int selectedIndex = 0;
         indicatorSpinner.setSelection(selectedIndex);
-        fetchIndicatorAndReload(indicatorTypeStrList[selectedIndex]);
         indicatorSelectedIndex = indicatorRenderedIndex = selectedIndex;
         setChangeButtonState();
 
+        // make js call backend data
+        updateWebView("Price");
+
+    }
+
+    private void updateWebView(String option) {
+        setIndicatorUIState(MyOperations.IN_PROGRESS);
+        // load the web view, when finishes, change UI through handler
+        indicatorWebView.addJavascriptInterface(new javascriptObject(symbolInput, option), "injectedObject");
+        indicatorWebView.loadUrl("file:///android_asset/indicator.html");
     }
 
     @Override
@@ -367,7 +383,8 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
             case R.id.change_indicator_button:
                 indicatorRenderedIndex = indicatorSelectedIndex;
                 setChangeButtonState();
-                fetchIndicatorAndReload(indicatorTypeStrList[indicatorSelectedIndex]);
+                updateWebView(indicatorTypeStrList[indicatorSelectedIndex]);
+                // fetchIndicatorAndReload(indicatorTypeStrList[indicatorSelectedIndex]);
                 break;
             default:
                 break;
@@ -485,8 +502,8 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
                                 JSONObject indicatorData = response.getJSONObject("data");
 
                                 // load the web view, when finishes, change UI through handler
-                                indicatorWebView.addJavascriptInterface(new javascriptObject(indicatorData, option), "injectedObject");
-                                indicatorWebView.loadUrl("file:///android_asset/indicator.html");
+                                // indicatorWebView.addJavascriptInterface(new javascriptObject(indicatorData, option), "injectedObject");
+                                // indicatorWebView.loadUrl("file:///android_asset/indicator.html");
                             } else {
                                 setIndicatorUIState(MyOperations.ERROR);
                                 indicatorState = MyOperations.ERROR;

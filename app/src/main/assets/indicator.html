@@ -1,161 +1,183 @@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
+
     <script src="https://code.highcharts.com/stock/highstock.src.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>
 <div id="indicator-chart-container"></div>
-        <script>
+<script>
+    function create_chart(indicatorData, indicatorType) {
+            var containerID = "indicator-chart-container";
+            var title = {
+              text: indicatorData.title
+            };
+            var subtitle = {
+              text: "<a class='indicator' href='https://www.alphavantage.co/' target='_blank'>Source: Alpha Vantage</a>",
+              useHTML: true,
+            };
+            var xAxis = {
+              tickInterval: 5,
+              categories: indicatorData.xValue,
+              labels: {
+                rotation: -45,
+              }
+            };
+            var yAxis = {};
+            if(indicatorType != "Price") {
+              yAxis.title = {
+                text: indicatorType,
+              };
+            } else {
+              yAxis = [];
+              yAxisSub1 = {
+                title: {
+                  text: "Stock Price",
+                },
+              };
+              yAxisSub2 = {
+                title: {
+                  text: "Volume",
+                },
+                opposite: true,
+              };
+              yAxis.push(yAxisSub1);
+              yAxis.push(yAxisSub2);
+            }
+            var series = [];
+            if(indicatorType == "Price") {
+              var seriesDataPrice = {
+                name: "Price",
+                color: "rgba(0,0,220,0.8)",
+                fillColor: "rgba(0,0,255,0.2)",
+                data: indicatorData.yValue.price,
+                tooltip: {
+                  valueDecimals: 2,
+                },
+                type: "area",
+              };
+              var seriesDataVolume = {
+                name: "Volume",
+                color: "red",
+                data: indicatorData.yValue.volume,
+                type: "column",
+                yAxis: 1,
+              };
+              series.push(seriesDataPrice);
+              series.push(seriesDataVolume);
+            } else if(indicatorType == "STOCH") {
+              var seriesDataK = {
+                name: indicatorData.symbol + " SlowK",
+                color: "DodgerBlue",
+                data: indicatorData.yValue.SlowK,
+              };
+              var seriesDataD = {
+                name: indicatorData.symbol + " SlowD",
+                color: "black",
+                data: indicatorData.yValue.SlowD,
+              };
+              series.push(seriesDataD);
+              series.push(seriesDataK);
+            } else if(indicatorType == "MACD") {
+              var seriesDataMACD = {
+                name: indicatorData.symbol + " MACD",
+                color: "DodgerBlue",
+                data: indicatorData.yValue.MACD,
+              };
+              var seriesDataHist = {
+                name: indicatorData.symbol + " MACD_Hist",
+                color: "black",
+                data: indicatorData.yValue.MACD_Hist,
+              };
+              var seriesDataSig = {
+                name: indicatorData.symbol + " MACD_Signal",
+                color: "orange",
+                data: indicatorData.yValue.MACD_Signal,
+              };
+              series.push(seriesDataMACD);
+              series.push(seriesDataHist);
+              series.push(seriesDataSig);
+            } else if(indicatorType == "BBANDS") {
+              var seriesDataLow = {
+                name: indicatorData.symbol + " Real Lower Band",
+                color: "DodgerBlue",
+                data: indicatorData.yValue['Real Lower Band'],
+              };
+              var seriesDataMid = {
+                name: indicatorData.symbol + " Real Middle Band",
+                color: "black",
+                data: indicatorData.yValue['Real Middle Band'],
+              };
+              var seriesDataUp = {
+                name: indicatorData.symbol + " Real Upper Band",
+                color: "orange",
+                data: indicatorData.yValue['Real Upper Band'],
+              };
+              series.push(seriesDataMid);
+              series.push(seriesDataUp);
+              series.push(seriesDataLow);
+            } else {
+              var seriesData = {
+                name: indicatorData.symbol,
+                color: "DodgerBlue",
+                data: indicatorData.yValue[indicatorType],
+              };
+              series.push(seriesData);
+            }
 
-            function create_chart(indicatorData, indicatorType) {
-                var containerID = "indicator-chart-container";
-                var title = {
-                  text: indicatorData.title
-                };
-                var subtitle = {
-                  text: "<a class='indicator' href='https://www.alphavantage.co/' target='_blank'>Source: Alpha Vantage</a>",
-                  useHTML: true,
-                };
-                var xAxis = {
-                  tickInterval: 5,
-                  categories: indicatorData.xValue,
-                  labels: {
-                    rotation: -45,
-                  }
-                };
-                var yAxis = {};
-                if(indicatorType != "Price") {
-                  yAxis.title = {
-                    text: indicatorType,
-                  };
-                } else {
-                  yAxis = [];
-                  yAxisSub1 = {
-                    title: {
-                      text: "Stock Price",
-                    },
-                  };
-                  yAxisSub2 = {
-                    title: {
-                      text: "Volume",
-                    },
-                    opposite: true,
-                  };
-                  yAxis.push(yAxisSub1);
-                  yAxis.push(yAxisSub2);
-                }
-                var series = [];
-                if(indicatorType == "Price") {
-                  var seriesDataPrice = {
-                    name: "Price",
-                    color: "rgba(0,0,220,0.8)",
-                    fillColor: "rgba(0,0,255,0.2)",
-                    data: indicatorData.yValue.price,
-                    tooltip: {
-                      valueDecimals: 2,
-                    },
-                    type: "area",
-                  };
-                  var seriesDataVolume = {
-                    name: "Volume",
-                    color: "red",
-                    data: indicatorData.yValue.volume,
-                    type: "column",
-                    yAxis: 1,
-                  };
-                  series.push(seriesDataPrice);
-                  series.push(seriesDataVolume);
-                } else if(indicatorType == "STOCH") {
-                  var seriesDataK = {
-                    name: indicatorData.symbol + " SlowK",
-                    color: "DodgerBlue",
-                    data: indicatorData.yValue.SlowK,
-                  };
-                  var seriesDataD = {
-                    name: indicatorData.symbol + " SlowD",
-                    color: "black",
-                    data: indicatorData.yValue.SlowD,
-                  };
-                  series.push(seriesDataD);
-                  series.push(seriesDataK);
-                } else if(indicatorType == "MACD") {
-                  var seriesDataMACD = {
-                    name: indicatorData.symbol + " MACD",
-                    color: "DodgerBlue",
-                    data: indicatorData.yValue.MACD,
-                  };
-                  var seriesDataHist = {
-                    name: indicatorData.symbol + " MACD_Hist",
-                    color: "black",
-                    data: indicatorData.yValue.MACD_Hist,
-                  };
-                  var seriesDataSig = {
-                    name: indicatorData.symbol + " MACD_Signal",
-                    color: "orange",
-                    data: indicatorData.yValue.MACD_Signal,
-                  };
-                  series.push(seriesDataMACD);
-                  series.push(seriesDataHist);
-                  series.push(seriesDataSig);
-                } else if(indicatorType == "BBANDS") {
-                  var seriesDataLow = {
-                    name: indicatorData.symbol + " Real Lower Band",
-                    color: "DodgerBlue",
-                    data: indicatorData.yValue['Real Lower Band'],
-                  };
-                  var seriesDataMid = {
-                    name: indicatorData.symbol + " Real Middle Band",
-                    color: "black",
-                    data: indicatorData.yValue['Real Middle Band'],
-                  };
-                  var seriesDataUp = {
-                    name: indicatorData.symbol + " Real Upper Band",
-                    color: "orange",
-                    data: indicatorData.yValue['Real Upper Band'],
-                  };
-                  series.push(seriesDataMid);
-                  series.push(seriesDataUp);
-                  series.push(seriesDataLow);
-                } else {
-                  var seriesData = {
-                    name: indicatorData.symbol,
-                    color: "DodgerBlue",
-                    data: indicatorData.yValue[indicatorType],
-                  };
-                  series.push(seriesData);
-                }
+            var options = {
+              chart: {
+                zoomType: 'x'
+              },
+              title: title,
+              subtitle: subtitle,
+              yAxis: yAxis,
+              xAxis: xAxis,
+              series: series,
+            };
+        return Highcharts.chart(containerID, options);
+    }
 
-                var options = {
-                  chart: {
-                    zoomType: 'x'
-                  },
-                  title: title,
-                  subtitle: subtitle,
-                  yAxis: yAxis,
-                  xAxis: xAxis,
-                  series: series,
-                };
-            return Highcharts.chart(containerID, options);
+    function getUrl(option, symbol, baseUrl) {
+      return baseUrl + "?type=indicator&option=" + option + "&symbol=" + symbol;
+    }
+
+    function displayChartAndReturnOptions() {
+      try{
+
+        var baseUrl = "http://stock-homework9.us-east-1.elasticbeanstalk.com/";
+        var indicatorType = injectedObject.getType();
+        var symbolInput = injectedObject.getSymbol();
+        var url = getUrl(indicatorType, symbolInput, baseUrl);
+        var options = "";
+        $.get(url, function(data, status) {
+          try {
+            if(status == "success" && data != null && data.status_code == 200 && data.data != null) {
+              options = create_chart(data.data, indicatorType).options;
+              injectedObject.readyToDisplay(JSON.stringify(options));
+            } else {
+              injectedObject.readyToDisplay("");
+            }
+          } catch(err) {
+            injectedObject.readyToDisplay("");
           }
-        function displayChartAndReturnOptions() {
-        try{
+          
+        }).fail(function() {
+            injectedObject.readyToDisplay("");
+        });
 
-            var jsonData = JSON.parse(injectedObject.getStrData());
-            var indicatorType = injectedObject.getType();
+      } catch(err) {
+        injectedObject.readyToDisplay("");
+        injectedObject.notifyAndroid(err.toString());
+      }
+    }
 
-            // when options is returned, the web view is ready to display
-            var options = create_chart(jsonData, indicatorType).options;
-            // return options through injectedObject
-            injectedObject.readyToDisplay(JSON.stringify(options));
-        } catch(err) {
-            injectedObject.notifyAndroid(err.toString());
-        }
-
-        }
-        displayChartAndReturnOptions();
-        </script>
+    displayChartAndReturnOptions();
+  </script>
 </body>
+
 
 </html>

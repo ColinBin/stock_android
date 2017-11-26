@@ -49,6 +49,10 @@ public class MyOperations {
 
     public static final int EXPORT_REQUEST = 555;
 
+    public static final int WEB_VIEW_FAILURE = 250;
+
+    public static final int WEB_VIEW_SUCCESS = 200;
+
 
     public static void makeToast(Activity activity, String msg) {
         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();

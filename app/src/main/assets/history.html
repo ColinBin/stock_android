@@ -1,91 +1,109 @@
 <html>
 <head>
-    <meta charset="utf-8" />
-    <script src="https://code.highcharts.com/stock/highstock.src.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <meta charset="utf-8" />
+  <script src="https://code.highcharts.com/stock/highstock.src.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 </head>
 <body>
 <div id="history-chart-container"></div>
-<script>
+  <script>
+    function create_history_chart(historyData) {
+      var containerID = 'history-chart-container';
+      var title = {
+        text: historyData.title,
+      };
+      var subtitle = {
+        text: "<a class='indicator' href='https://www.alphavantage.co/' target='_blank'>Source: Alpha Vantage</a>",
+        useHTML: true,
+      };
+      var yAxis = {
+        title: {
+          text: "Stock Value",
+        }
+      };
+      var seriesData = {
+        type: "area",
+        data: historyData.data,
+        name: historyData.symbol,
+      }
+      var rangeSelector = {
+        buttons: [{
+            type: 'month',
+            count: 1,
+            text: '1m'
+        }, {
+            type: 'month',
+            count: 3,
+            text: '3m'
+        }, {
+            type: 'month',
+            count: 6,
+            text: '6m'
+        }, {
+            type: 'year',
+            count: 1,
+            text: '1y'
+        }, {
+            type: 'all',
+            text: 'All'
+        }],
+        selected: 0
+      }
 
-        function create_history_chart(historyData) {
-            var containerID = 'history-chart-container';
-            var title = {
-              text: historyData.title,
-            };
-            var subtitle = {
-              text: "<a class='indicator' href='https://www.alphavantage.co/' target='_blank'>Source: Alpha Vantage</a>",
-              useHTML: true,
-            };
-            var yAxis = {
-              title: {
-                text: "Stock Value",
-              }
-            };
-            var seriesData = {
-              type: "area",
-              data: historyData.data,
-              name: historyData.symbol,
+      var options = {
+        yAxis: yAxis,
+        title: title,
+        subtitle: subtitle,
+        series: [seriesData],
+        rangeSelector: rangeSelector,
+        tooltip: {
+          formatter: function () {
+            var s = Highcharts.dateFormat('%A, %b %e, %Y', this.x);
+            $.each(this.points, function () {
+                s += '<br/><span style="color:' + this.color+ '">\u25CF</span>' + this.series.name +': <b>' + this.y + '</b>';
+            });
+            return s;
+          }
+        }
+      };
+
+      Highcharts.stockChart(containerID, options);
+    }
+    function displayHistoryChart() {
+      try{
+        var symbol = injectedObject.getSymbol();
+        var baseUrl = "http://stock-homework9.us-east-1.elasticbeanstalk.com/";
+        var url = getUrl(symbol, baseUrl);
+        $.get(url, function(data, status){
+          try {
+            if(status == "success" && data != null && data.status_code == 200 && data.data != null) {
+              create_history_chart(data.data);
+              injectedObject.readyToDisplay("OK");
+            } else {
+               injectedObject.readyToDisplay("");
             }
-            var rangeSelector = {
-              buttons: [{
-                  type: 'month',
-                  count: 1,
-                  text: '1m'
-              }, {
-                  type: 'month',
-                  count: 3,
-                  text: '3m'
-              }, {
-                  type: 'month',
-                  count: 6,
-                  text: '6m'
-              }, {
-                  type: 'year',
-                  count: 1,
-                  text: '1y'
-              }, {
-                  type: 'all',
-                  text: 'All'
-              }],
-              selected: 0
-            }
-
-            var options = {
-              yAxis: yAxis,
-              title: title,
-              subtitle: subtitle,
-              series: [seriesData],
-              rangeSelector: rangeSelector,
-              tooltip: {
-                formatter: function () {
-                  var s = Highcharts.dateFormat('%A, %b %e, %Y', this.x);
-                  $.each(this.points, function () {
-                      s += '<br/><span style="color:' + this.color+ '">\u25CF</span>' + this.series.name +': <b>' + this.y + '</b>';
-                  });
-                  return s;
-                }
-              }
-            };
-
-            Highcharts.stockChart(containerID, options);
-        }
-        function displayHistoryChart() {
-        try{
-            var jsonData = JSON.parse(injectedObject.getStrData());
-            // when options is returned, the web view is ready to display
-            create_history_chart(jsonData);
-            // return options through injectedObject
-            injectedObject.readyToDisplay();
-        } catch(err) {
-            injectedObject.notifyAndroid(err.toString());
-        }
-
-        }
-        displayHistoryChart();
-        </script>
+          }catch(err) {
+             injectedObject.notifyAndroid(err);
+             injectedObject.readyToDisplay("");
+          }
+          
+        }).fail(function() {
+           injectedObject.readyToDisplay("");
+        });
+        
+      } catch(err) {
+         injectedObject.readyToDisplay("");
+         injectedObject.notifyAndroid(err);
+      }
+    }
+    function getUrl(symbol, baseUrl) {
+      return baseUrl + "?type=stock_history&symbol=" + symbol;
+    }
+    displayHistoryChart();
+  </script>
 </body>
 
 </html>
