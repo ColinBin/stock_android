@@ -349,6 +349,7 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
     }
 
     private void updateWebView(String option) {
+        indicatorErrorMsg.setText("Unable to load " + option + " data.");
         setIndicatorUIState(MyOperations.IN_PROGRESS);
         // load the web view, when finishes, change UI through handler
         indicatorWebView.addJavascriptInterface(new javascriptObject(symbolInput, option), "injectedObject");
