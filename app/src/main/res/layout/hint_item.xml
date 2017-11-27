@@ -5,7 +5,10 @@
     <TextView
         android:id="@+id/hint_description"
         android:textSize="17sp"
-        android:padding="8sp"
+        android:paddingStart="8sp"
+        android:paddingEnd="8sp"
+        android:paddingTop="14sp"
+        android:paddingBottom="14sp"
         android:textColor="@color/black"
         android:text="Sample description"
         android:layout_width="wrap_content"

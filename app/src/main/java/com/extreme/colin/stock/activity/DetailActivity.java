@@ -64,6 +64,7 @@ public class DetailActivity extends AppCompatActivity {
 
 
         mViewPager = findViewById(R.id.container);
+        mViewPager.setOffscreenPageLimit(3);
         setupViewPager(mViewPager);
 
         TabLayout tabLayout = findViewById(R.id.tabs);

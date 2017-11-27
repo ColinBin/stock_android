@@ -63,8 +63,8 @@
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         >
                         <TextView
                             android:layout_weight="1"
@@ -73,20 +73,17 @@
                             android:text="Stock Symbol"
                             />
                         <TextView
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:id="@+id/detail_symbol"
                             android:textColor="@color/black"
                             android:text="Sample Symbol"
-                            />
-                        <TextView
-                            android:layout_weight="2"
                             />
                     </TableRow>
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         >
                         <TextView
                             android:layout_weight="1"
@@ -95,49 +92,53 @@
                             android:text="Last Price"
                             />
                         <TextView
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:id="@+id/detail_price"
                             android:textColor="@color/black"
                             android:text="Sample Price"
-                            />
-                        <TextView
-                            android:layout_weight="2"
                             />
                     </TableRow>
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp">
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
                         <TextView
                             android:layout_weight="1"
                             android:textColor="@color/black"
                             android:textStyle="bold"
                             android:text="Change"
                             />
-
-                        <TextView
-                            android:layout_weight="1"
-                            android:id="@+id/detail_change"
-                            android:textColor="@color/black"
-                            android:text="Sample Change"
-                            />
-                        <ImageView
-                            android:id="@+id/detail_arrow"
-                            android:layout_gravity="start"
-                            android:scaleType="fitStart"
+                        <LinearLayout
                             android:layout_weight="2"
-                            android:adjustViewBounds="true"
-                            android:maxHeight="20dp"
-                            android:maxWidth="20dp"
-                            android:src="@drawable/up"
-                            />
+                            >
+                            <TextView
+                                android:id="@+id/detail_change"
+                                android:layout_height="match_parent"
+                                android:layout_width="wrap_content"
+                                android:textColor="@color/black"
+                                android:text="Sample Change"
+                                />
+                            <ImageView
+                                android:id="@+id/detail_arrow"
+                                android:layout_marginStart="10dp"
+                                android:layout_height="match_parent"
+                                android:layout_width="wrap_content"
+                                android:layout_gravity="start"
+                                android:scaleType="fitStart"
+                                android:adjustViewBounds="true"
+                                android:maxHeight="20dp"
+                                android:maxWidth="20dp"
+                                android:src="@drawable/up"
+                                />
+                        </LinearLayout>
+
                     </TableRow>
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         >
                         <TextView
                             android:layout_weight="1"
@@ -146,20 +147,18 @@
                             android:text="Timestamp"
                             />
                         <TextView
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:id="@+id/detail_timestamp"
                             android:textColor="@color/black"
                             android:text="Sample timestamp"
                             />
-                        <TextView
-                            android:layout_weight="2"
-                            />
+
                     </TableRow>
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         >
                         <TextView
                             android:layout_weight="1"
@@ -168,20 +167,18 @@
                             android:text="Open"
                             />
                         <TextView
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:id="@+id/detail_open"
                             android:textColor="@color/black"
                             android:text="Sample Open"
                             />
-                        <TextView
-                            android:layout_weight="2"
-                            />
+
                     </TableRow>
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         >
                         <TextView
                             android:layout_weight="1"
@@ -191,20 +188,17 @@
                             android:text="Close"
                             />
                         <TextView
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:id="@+id/detail_close"
                             android:textColor="@color/black"
                             android:text="Sample Close"
-                            />
-                        <TextView
-                            android:layout_weight="2"
                             />
                     </TableRow>
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         >
                         <TextView
                             android:layout_weight="1"
@@ -213,20 +207,18 @@
                             android:text="Day's Range"
                             />
                         <TextView
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:id="@+id/detail_range"
                             android:textColor="@color/black"
                             android:text="Sample Range"
                             />
-                        <TextView
-                            android:layout_weight="2"
-                            />
+
                     </TableRow>
                     <TableRow
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         >
                         <TextView
                             android:layout_weight="1"
@@ -235,14 +227,12 @@
                             android:text="Volume"
                             />
                         <TextView
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:id="@+id/detail_volume"
                             android:textColor="@color/black"
                             android:text="Sample Volume"
                             />
-                        <TextView
-                            android:layout_weight="2"
-                            />
+
                     </TableRow>
                     <TableRow>
                     </TableRow>
