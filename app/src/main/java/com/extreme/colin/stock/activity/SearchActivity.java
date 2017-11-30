@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -142,6 +143,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 // when checked, fire auto refresh
                 if(b) {
+                    if(favoriteList.size() == 0)
+                        return;
                     mHandler.postDelayed(mFavoriteRefresher, MyOperations.INTERVAL);
                 } else {
                     queue.cancelAll(MyOperations.DETAIL_REQUEST);
@@ -268,6 +271,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 autoCompleteInputView.setText("");
                 break;
             case R.id.refresh_button:
+                if(favoriteList.size() == 0)
+                    return;
                 // call back end for favorite symbols data
                 searchProgressBar.setVisibility(View.VISIBLE);
                 refreshFavorite();
@@ -311,9 +316,17 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                                     ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         if (v.getId()==R.id.favorite_list) {
-            menu.setHeaderTitle("Remove from Favorites?");
+            // menu.setHeaderTitle("Remove from Favorites?");
+            LayoutInflater headerInflater = (LayoutInflater) getApplicationContext()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            ViewGroup header = (ViewGroup) headerInflater.inflate(
+                    R.layout.menu_header, null);
+            menu.setHeaderView(header);
+
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.long_press_menu, menu);
+
         }
     }
 
@@ -514,7 +527,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                                 e.printStackTrace();
 
                             } finally {
-                                // TODO check whether the queue is empty before hide the progress bar
+                                 // TODO check whether the queue is empty before hide the progress bar
                                 searchProgressBar.setVisibility(View.INVISIBLE);
                             }
                         }

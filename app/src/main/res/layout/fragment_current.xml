@@ -286,17 +286,18 @@
 
             </LinearLayout>
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:minHeight="300dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:minHeight="500dp"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:gravity="center_vertical|center_horizontal" >
                 <WebView
                     android:id="@+id/indicator_web_view"
                     android:layout_marginTop="15sp"
+                    android:layout_marginBottom="15sp"
                     android:visibility="invisible"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content">
                 </WebView>
                 <ProgressBar
                     android:id="@+id/indicator_progress_bar"
