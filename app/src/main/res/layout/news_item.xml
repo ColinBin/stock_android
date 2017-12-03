@@ -24,7 +24,7 @@
             android:layout_marginTop="10dp"
             android:textColor="@color/gray"
             android:text="Author"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
@@ -33,7 +33,7 @@
             android:layout_marginStart="5dp"
             android:textColor="@color/gray"
             android:text="Date"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

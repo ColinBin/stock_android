@@ -478,6 +478,8 @@ public class CurrentFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+
+    // currently not using APP to fetch indicator data
     private void fetchIndicatorAndReload(final String option) {
         setIndicatorUIState(MyOperations.IN_PROGRESS);
         indicatorState = MyOperations.IN_PROGRESS;

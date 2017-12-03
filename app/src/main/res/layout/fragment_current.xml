@@ -41,8 +41,8 @@
                         android:layout_marginStart="15dp"
                         android:layout_gravity="center"
                         android:background="@drawable/empty"
-                        android:layout_height="35sp"
-                        android:layout_width="35sp"
+                        android:layout_height="40sp"
+                        android:layout_width="40sp"
                         />
                 </LinearLayout>
 

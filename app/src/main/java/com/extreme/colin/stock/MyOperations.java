@@ -28,7 +28,7 @@ import static com.android.volley.VolleyLog.TAG;
 
 public class MyOperations {
 
-    public static final String baseUrl = "http://stock-homework9.us-east-1.elasticbeanstalk.com/";
+    public static final String baseUrl = "http://colinbin.us-east-1.elasticbeanstalk.com/";
     public static final String exportUrl = "http://export.highcharts.com/";
 
     public static final int IN_PROGRESS = -1;
@@ -44,8 +44,6 @@ public class MyOperations {
     public static final int AUTOCOMPLETE_REQUEST = 222;
 
     public static final int INDICATOR_REQUEST = 333;
-
-    public static final int HISTORY_REQUEST = 444;
 
     public static final int EXPORT_REQUEST = 555;
 

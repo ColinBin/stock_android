@@ -334,6 +334,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.option_no:
+                MyOperations.makeToast(this, "Selected no.");
                 return false;
             case R.id.option_yes:
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -343,6 +344,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 favoriteList.remove(selectedPosition);
                 updateArrayAndWriteToLocal();
                 favoriteAdaptor.notifyDataSetChanged();
+                MyOperations.makeToast(this, "Selected yes.");
                 return true;
             default:
                 return false;
